@@ -45,33 +45,29 @@ public class UserService {
         return new UserResponse(u.getId(), u.getFullName(), u.getEmail(), u.getRole());
     }
 
-    @Transactional 
+    @Transactional
     public UserResponse update(Long id, UserUpdateRequest req) {
-        var u = repo.findById(id).orElseThrow(() -> new NoSuchElementException("User not found"));
+        User u = repo.findById(id).orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        if (req.fullName() != null && !req.fullName().isBlank()) {
-            u.setFullName(req.fullName());
+        if (req.fullName() != null) {
+            String name = req.fullName().trim();
+            if (name.isEmpty()) throw new IllegalArgumentException("Full name cannot be blank");
+            u.setFullName(name);
         }
-
-        if (req.email() != null && !req.email().isBlank()) {
-            var newEmail = req.email();
-            if (!newEmail.equalsIgnoreCase(u.getEmail()) && repo.existsByEmail(newEmail)) {
-                throw new IllegalArgumentException("E-mail already in use");
+        if (req.email() != null && !req.email().equalsIgnoreCase(u.getEmail())) {
+            if (repo.existsByEmail(req.email())) {
+            throw new IllegalArgumentException("E-mail already in use");
             }
-
-        u.setEmail(newEmail);
-
+            u.setEmail(req.email());
         }
-
-        if (req.password() != null && !req.password().isBlank()) {
+        if (req.password() != null) {
             u.setPasswordHash(encoder.encode(req.password()));
         }
 
-        var saved = repo.save(u);
+        User saved = repo.save(u);
         return new UserResponse(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole());
 
     }
-
     @Transactional 
         public void delete(Long id) {
         try {

@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"  
+      - "5432:5432"
     volumes:
       - rhydon_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -15,6 +15,39 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  app:
+    build: .
+    container_name: rhydon_app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rhydon
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      SERVER_PORT: "8080"
+
+      # níveis de log (mantenha simples)
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_COM_RHYDON: ERROR
+
+      # 🔽 Access log do Tomcat indo para o STDOUT do container
+      SERVER_TOMCAT_ACCESSLOG_ENABLED: "true"
+      SERVER_TOMCAT_BASEDIR: "/opt/app"
+      SERVER_TOMCAT_ACCESSLOG_DIRECTORY: "/dev"
+      SERVER_TOMCAT_ACCESSLOG_PREFIX: "stdout"
+      SERVER_TOMCAT_ACCESSLOG_SUFFIX: ""
+      SERVER_TOMCAT_ACCESSLOG_ROTATE: "false"
+      # formato comum + duração em microssegundos
+      SERVER_TOMCAT_ACCESSLOG_PATTERN: '%h %l %u %t "%r" %s %b %D'
+
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 
 volumes:
   rhydon_pgdata:

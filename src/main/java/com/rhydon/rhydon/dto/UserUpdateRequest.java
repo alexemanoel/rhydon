@@ -1,11 +1,9 @@
 package com.rhydon.rhydon.dto;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Size;
-
 public record UserUpdateRequest(
-  @Nullable String fullName,
-  @Email @Nullable String email,
-  @Size(min = 6, max = 72) @Nullable String password
+  String fullName,              
+  @jakarta.validation.constraints.Email(message="Invalid e-mail")
+  String email,                 
+  @jakarta.validation.constraints.Size(min=6, message="Password must have at least 6 chars")
+  String password                
 ) {}

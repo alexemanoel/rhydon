@@ -3,6 +3,7 @@ package com.rhydon.rhydon.controller;
 import com.rhydon.rhydon.dto.PageResponse;
 import com.rhydon.rhydon.dto.UserCreateRequest;
 import com.rhydon.rhydon.dto.UserResponse;
+import com.rhydon.rhydon.dto.UserUpdateRequest;
 import com.rhydon.rhydon.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,12 @@ public class UserController {
         @RequestParam(defaultValue = "desc") String dir
     ) {
     return service.list(page, size, sort, dir);
+    }
+
+
+    @PutMapping("/{id}")
+    public UserResponse update(@PathVariable Long id, @RequestBody @Valid UserUpdateRequest req) {
+        return service.update(id, req);
     }
 
     @DeleteMapping("/{id}")
